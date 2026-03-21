@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Do-It Kidz - Tracker Duit Raya</title>
+    
+    <!-- Meta Tag untuk Web App (Android & iOS) -->
+    <meta name="theme-color" content="#4ade80">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Do-It Kidz">
+    
+    <!-- Favicon & Touch Icon -->
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/52zv93pg/image-removebg-preview.png">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/52zv93pg/image-removebg-preview.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* CSS Tambahan untuk Scrollbar yang cantik */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0; 
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 font-sans text-gray-800 p-4 sm:p-8 flex justify-center items-start">
+    
+    <!-- Kontena Utama -->
+    <div class="max-w-md w-full bg-white/90 backdrop-blur-md rounded-[3rem] shadow-2xl overflow-hidden border-4 border-yellow-300">
+        
+        <!-- Header App -->
+        <div class="bg-yellow-400 p-6 text-center relative overflow-hidden rounded-b-[2rem] shadow-md">
+            <div class="absolute top-2 left-2 text-yellow-600 opacity-50"><i data-lucide="star" width="24" height="24"></i></div>
+            <div class="absolute bottom-2 right-2 text-yellow-600 opacity-50"><i data-lucide="sparkles" width="24" height="24"></i></div>
+            
+            <h1 class="text-4xl font-extrabold text-green-800 tracking-tight drop-shadow-sm flex items-center justify-center gap-2">
+                <img src="https://i.postimg.cc/52zv93pg/image-removebg-preview.png" alt="Logo Do-It Kidz" class="w-14 h-14 object-contain drop-shadow-md">
+                Do-It Kidz
+            </h1>
+            <p class="text-green-700 font-medium mt-1 text-sm">Tracker Duit Raya Paling Cool! 🌙✨</p>
+        </div>
+
+        <!-- Navigasi Tab -->
+        <div class="px-6 pt-6 flex gap-3">
+            <button id="tabRekodBtn" onclick="tukarTab('rekod')" class="flex-1 py-3 rounded-2xl font-bold text-lg transition-all flex justify-center items-center gap-2 bg-green-500 text-white shadow-md border-b-4 border-green-700 active:translate-y-1">
+                <i data-lucide="edit-3" width="20" height="20"></i> Rekod
+            </button>
+            <button id="tabJumlahBtn" onclick="tukarTab('jumlah')" class="flex-1 py-3 rounded-2xl font-bold text-lg transition-all flex justify-center items-center gap-2 bg-gray-100 text-gray-500 hover:bg-gray-200 border-b-4 border-gray-300 active:translate-y-1">
+                <i data-lucide="pie-chart" width="20" height="20"></i> Jumlah Duit
+            </button>
+        </div>
+
+        <!-- VIEW 1: REKOD (Borang & Sejarah) -->
+        <div id="viewRekod" class="block">
+            
+            <!-- Paparan Jumlah Keseluruhan (Stail Sampul Raya) -->
+            <div class="px-6 pt-8 pb-4">
+                <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-3xl p-6 text-center shadow-lg border-2 border-green-300 relative transform transition hover:scale-105 duration-300">
+                    <div class="absolute -top-4 -right-4 bg-yellow-400 rounded-full p-2 shadow-md">
+                        <i data-lucide="coins" class="text-green-800" width="28" height="28"></i>
+                    </div>
+                    <p class="text-green-100 font-semibold mb-1">Jumlah Terkumpul</p>
+                    <h2 class="text-5xl font-black text-yellow-300 drop-shadow-md" id="jumlahKeseluruhan">
+                        RM 0.00
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Borang Input -->
+            <div class="px-6 py-4">
+                <form id="borangDuitRaya" class="space-y-4">
+                    
+                    <!-- Bekas Mesej Ralat -->
+                    <div id="bekasRalat" class="hidden bg-red-100 text-red-600 p-3 rounded-xl text-sm font-medium text-center border border-red-200">
+                        <!-- Teks ralat akan dipaparkan di sini -->
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-1 px-2">
+                            <label class="block text-sm font-bold text-gray-700">Siapa terima duit raya? 👦👧</label>
+                            <button type="button" onclick="refreshDropdownNama()" class="text-xs text-green-700 hover:text-green-900 font-bold flex items-center gap-1 bg-green-100 hover:bg-green-200 py-1.5 px-3 rounded-xl transition-all active:scale-95 shadow-sm">
+                                <i data-lucide="refresh-cw" width="14" height="14" id="ikonRefresh"></i> Segar Semula
+                            </button>
+                        </div>
+                        <input
+                            type="text"
+                            id="inputNama"
+                            list="senaraiNama"
+                            placeholder="Cth: Along, Angah, Adik..."
+                            class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 outline-none transition font-medium text-lg placeholder-gray-400 shadow-inner"
+                        />
+                        <!-- Datalist untuk dropdown nama dari Google Sheet -->
+                        <datalist id="senaraiNama">
+                            <!-- Data akan dijana oleh JavaScript -->
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1 ml-2">Berapa RM? 💵</label>
+                        <div class="relative">
+                            <span class="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold text-lg">RM</span>
+                            <input
+                                type="number"
+                                step="0.01"
+                                id="inputJumlah"
+                                placeholder="0.00"
+                                class="w-full pl-14 pr-5 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 outline-none transition font-black text-xl text-green-700 shadow-inner"
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="w-full bg-yellow-400 hover:bg-yellow-300 text-green-900 font-extrabold text-lg py-4 rounded-2xl shadow-lg transform transition hover:-translate-y-1 active:translate-y-1 flex items-center justify-center gap-2 border-b-4 border-yellow-500 hover:border-yellow-400"
+                    >
+                        <i data-lucide="plus-circle" width="24" height="24"></i>
+                        Simpan Duit Raya!
+                    </button>
+                </form>
+            </div>
+
+            <!-- Senarai Transaksi -->
+            <div class="px-6 pb-8 pt-2">
+                <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2 ml-2">
+                    <i data-lucide="sparkles" class="text-yellow-500" width="18" height="18"></i> 
+                    Sejarah Koleksi
+                </h3>
+                
+                <!-- Bekas Senarai Dinamik -->
+                <div id="senaraiKoleksi" class="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    <!-- Data akan dijana oleh JavaScript -->
+                </div>
+            </div>
+
+        </div> <!-- Tamat VIEW 1 -->
+
+        <!-- VIEW 2: JUMLAH DUIT (Kad Keseluruhan & Kad Individu) -->
+        <div id="viewJumlah" class="hidden px-6 pb-8 pt-6 space-y-6">
+            <!-- Data Kad akan dijana oleh JavaScript -->
+        </div>
+
+    </div>
+
+    <script>
+        // Inisialisasi Ikon Lucide untuk elemen statik
+        lucide.createIcons();
+
+        // --- APPSCRIPT URL HARDCODED DI SINI ---
+        const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3rWHvx7glvcIf57HX8dbLuruF7SfoX8eoO_TEHgXUiN4P-HY2EuUyItgbh_DlmQOnqA/exec';
+
+        // --- GOOGLE SHEET CSV URL UNTUK DROPDOWN ---
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSY5yjCFIH3uQaI1Y7JO_L_U651dAmuv6thG_h9_kJN7ZCINhXdrscIgJnbyFIbFrBEZ085MU27VlUm/pub?gid=1090904384&single=true&output=csv';
+
+        // State / Pembolehubah utama
+        let koleksi = [];
+
+        // Elemen-elemen DOM
+        const borang = document.getElementById('borangDuitRaya');
+        const inputNama = document.getElementById('inputNama');
+        const datalistNama = document.getElementById('senaraiNama');
+        const inputJumlah = document.getElementById('inputJumlah');
+        const bekasRalat = document.getElementById('bekasRalat');
+        const jumlahKeseluruhanEl = document.getElementById('jumlahKeseluruhan');
+        const senaraiKoleksiEl = document.getElementById('senaraiKoleksi');
+        const viewJumlahEl = document.getElementById('viewJumlah');
+
+        // Fungsi Tukar Tab
+        window.tukarTab = function(tab) {
+            const viewRekod = document.getElementById('viewRekod');
+            const viewJumlah = document.getElementById('viewJumlah');
+            const btnRekod = document.getElementById('tabRekodBtn');
+            const btnJumlah = document.getElementById('tabJumlahBtn');
+
+            if (tab === 'rekod') {
+                viewRekod.classList.remove('hidden');
+                viewJumlah.classList.add('hidden');
+                
+                // Style Aktif untuk Rekod
+                btnRekod.className = "flex-1 py-3 rounded-2xl font-bold text-lg transition-all flex justify-center items-center gap-2 bg-green-500 text-white shadow-md border-b-4 border-green-700 active:translate-y-1";
+                // Style Pasif untuk Jumlah
+                btnJumlah.className = "flex-1 py-3 rounded-2xl font-bold text-lg transition-all flex justify-center items-center gap-2 bg-gray-100 text-gray-500 hover:bg-gray-200 border-b-4 border-gray-300 active:translate-y-1";
+            } else {
+                viewRekod.classList.add('hidden');
+                viewJumlah.classList.remove('hidden');
+
+                // Style Aktif untuk Jumlah
+                btnJumlah.className = "flex-1 py-3 rounded-2xl font-bold text-lg transition-all flex justify-center items-center gap-2 bg-yellow-400 text-yellow-900 shadow-md border-b-4 border-yellow-600 active:translate-y-1";
+                // Style Pasif untuk Rekod
+                btnRekod.className = "flex-1 py-3 rounded-2xl font-bold text-lg transition-all flex justify-center items-center gap-2 bg-gray-100 text-gray-500 hover:bg-gray-200 border-b-4 border-gray-300 active:translate-y-1";
+                
+                // Panggil fungsi tarik data jumlah dari Google Sheet bila tab dibuka
+                muatTurunDanRenderJumlah();
+            }
+        };
+
+        // Fungsi untuk mengemaskini paparan (Render)
+        function renderKoleksi() {
+            // 1. Kira dan papar jumlah keseluruhan
+            const jumlahTerkumpul = koleksi.reduce((total, item) => total + item.jumlah, 0);
+            
+            // Pastikan elemen wujud sebelum mengubah suai
+            if (jumlahKeseluruhanEl) {
+                jumlahKeseluruhanEl.innerText = `RM ${jumlahTerkumpul.toFixed(2)}`;
+            }
+
+            // 2. Render senarai
+            senaraiKoleksiEl.innerHTML = ''; // Kosongkan senarai lama
+
+            if (koleksi.length === 0) {
+                // Paparan jika tiada rekod
+                senaraiKoleksiEl.innerHTML = `
+                    <div class="text-center py-8 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                        <p class="text-gray-500 font-medium text-sm">Belum ada duit raya lagi...<br/>Jom pergi beraya! 🏃‍♂️💨</p>
+                    </div>
+                `;
+            } else {
+                // Paparan rekod sedia ada
+                koleksi.forEach((rekod, index) => {
+                    const warnaBorder = index % 2 === 0 ? 'border-l-green-400' : 'border-l-yellow-400';
+                    
+                    const itemHTML = `
+                        <div class="flex justify-between items-center p-4 rounded-2xl border-l-[6px] shadow-sm bg-white border-2 border-gray-100 transition-all hover:shadow-md ${warnaBorder}">
+                            <div class="flex-1">
+                                <p class="font-bold text-gray-800 text-lg">${rekod.nama}</p>
+                                <p class="text-xs text-gray-400 font-medium mt-0.5">${rekod.tarikh}</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-black text-green-600 text-xl bg-green-50 px-3 py-1 rounded-xl">
+                                    +RM${rekod.jumlah.toFixed(2)}
+                               </span>
+                                <button 
+                                    onclick="padamRekod(${rekod.id})"
+                                    class="text-red-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition"
+                                    aria-label="Padam rekod"
+                                >
+                                    <i data-lucide="trash-2" width="20" height="20"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    // Tambah ke dalam DOM
+                    senaraiKoleksiEl.insertAdjacentHTML('beforeend', itemHTML);
+                });
+            }
+
+            // Inisialisasi semula ikon Lucide untuk keseluruhan yang baru di-render
+            lucide.createIcons();
+        }
+
+        // Fungsi papar ralat
+        function paparRalat(mesej) {
+            bekasRalat.innerText = mesej;
+            bekasRalat.classList.remove('hidden');
+        }
+
+        // Fungsi sembunyi ralat
+        function sembunyiRalat() {
+            bekasRalat.innerText = '';
+            bekasRalat.classList.add('hidden');
+        }
+
+        // Fungsi Padam Rekod (dipanggil dari butang dalam senarai HTML)
+        window.padamRekod = function(id) {
+            koleksi = koleksi.filter(rekod => rekod.id !== id);
+            renderKoleksi();
+        };
+
+        // Fungsi memuat turun senarai nama dari Google Sheet (CSV)
+        async function muatTurunSenaraiNama() {
+            try {
+                // Tambah timestamp pada URL untuk elak Browser Cache (memaksa tarik data terbaharu)
+                const urlTerkini = CSV_URL + '&t=' + new Date().getTime();
+                const response = await fetch(urlTerkini);
+                if (!response.ok) throw new Error('Gagal muat turun CSV');
+                
+                const csvText = await response.text();
+                const rows = csvText.split('\n');
+                const senaraiUnik = new Set();
+                
+                // Mula dari row 1 (Abaikan row 0 kerana ia adalah Header)
+                for (let i = 1; i < rows.length; i++) {
+                    const columns = rows[i].split(',');
+                    if (columns.length >= 2) {
+                        // Ambil Column B (Index 1) dan buang white space
+                        const nama = columns[1].trim().replace(/^"|"$/g, '');
+                        if (nama) {
+                            senaraiUnik.add(nama);
+                        }
+                    }
+                }
+
+                // Kosongkan senarai lama sebelum tambah yang baru
+                datalistNama.innerHTML = '';
+
+                // Masukkan nama unik ke dalam elemen datalist HTML
+                senaraiUnik.forEach(nama => {
+                    const option = document.createElement('option');
+                    option.value = nama;
+                    datalistNama.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Ralat menarik data senarai nama:', error);
+            }
+        }
+
+        // Fungsi memuat turun dan mengira Jumlah Duit dari Google Sheet (CSV)
+        window.muatTurunDanRenderJumlah = async function() {
+            // Tunjuk paparan "Loading"
+            viewJumlahEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-16 text-green-600">
+                    <i data-lucide="loader-2" class="animate-spin mb-4" width="40" height="40"></i>
+                    <p class="font-bold text-lg">Mengira duit raya...</p>
+                    <p class="text-sm text-gray-500">Menarik data dari Google Sheets</p>
+                </div>
+            `;
+            lucide.createIcons();
+
+            try {
+                const urlTerkini = CSV_URL + '&t=' + new Date().getTime();
+                const response = await fetch(urlTerkini);
+                if (!response.ok) throw new Error('Gagal muat turun CSV');
+                
+                const csvText = await response.text();
+                const rows = csvText.split('\n');
+                
+                const ringkasan = {};
+                let jumlahTerkumpul = 0;
+                
+                // Mula dari row 1 (Abaikan row 0 kerana ia adalah Header)
+                for (let i = 1; i < rows.length; i++) {
+                    // Gunakan split koma standard
+                    const columns = rows[i].split(',');
+                    
+                    // Pastikan baris mempunyai data secukupnya (minima ada Kolum A, B, C)
+                    if (columns.length >= 3) {
+                        // Kolum B (Index 1) = Nama, Kolum C (Index 2) = Jumlah
+                        const nama = columns[1].trim().replace(/^"|"$/g, '');
+                        const jumlahStr = columns[2].trim().replace(/^"|"$/g, '');
+                        const jumlah = parseFloat(jumlahStr);
+                        
+                        // Jika nama wujud dan jumlah adalah nombor yang sah
+                        if (nama && !isNaN(jumlah)) {
+                            if (!ringkasan[nama]) ringkasan[nama] = 0;
+                            ringkasan[nama] += jumlah;
+                            jumlahTerkumpul += jumlah;
+                        }
+                    }
+                }
+
+                // Tukar objek ke tatasusunan (array) & susun dari jumlah terbanyak
+                const senaraiIndividu = Object.keys(ringkasan).map(nama => ({
+                    nama: nama,
+                    jumlah: ringkasan[nama]
+                })).sort((a, b) => b.jumlah - a.jumlah);
+
+                let htmlJumlah = `
+                    <!-- Kad Jumlah Keseluruhan -->
+                    <div class="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-3xl p-6 text-center shadow-lg border-2 border-yellow-200 relative overflow-hidden transform transition hover:scale-105 duration-300">
+                        <div class="absolute -right-4 -top-4 opacity-20 text-yellow-800">
+                            <i data-lucide="award" width="120" height="120"></i>
+                        </div>
+                        <p class="text-yellow-900 font-bold mb-1 relative z-10 text-lg">Keseluruhan Kutipan Keluarga</p>
+                        <h2 class="text-5xl font-black text-white drop-shadow-md relative z-10">
+                            RM ${jumlahTerkumpul.toFixed(2)}
+                        </h2>
+                    </div>
+
+                    <div class="pt-2">
+                        <div class="flex justify-between items-center mb-4 ml-2">
+                            <h3 class="font-bold text-gray-700 flex items-center gap-2">
+                                <i data-lucide="users" class="text-green-500" width="20" height="20"></i> 
+                                Kutipan Setiap Orang
+                            </h3>
+                            <button onclick="muatTurunDanRenderJumlah()" class="text-xs text-green-700 hover:text-green-900 font-bold flex items-center gap-1 bg-green-100 hover:bg-green-200 py-1.5 px-3 rounded-xl transition-all active:scale-95 shadow-sm">
+                                <i data-lucide="refresh-cw" width="14" height="14"></i> Segar Semula
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                `;
+
+                if (senaraiIndividu.length === 0) {
+                    htmlJumlah += `
+                        <div class="col-span-2 text-center py-8 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                            <p class="text-gray-500 font-medium text-sm">Belum ada duit raya direkodkan dalam sistem.</p>
+                        </div>
+                    `;
+                } else {
+                    senaraiIndividu.forEach((individu, index) => {
+                        const paletBiasa = [
+                            { bg: 'bg-pink-100', border: 'border-pink-300', text: 'text-pink-700', icon: 'text-pink-500' },
+                            { bg: 'bg-blue-100', border: 'border-blue-300', text: 'text-blue-700', icon: 'text-blue-500' },
+                            { bg: 'bg-purple-100', border: 'border-purple-300', text: 'text-purple-700', icon: 'text-purple-500' },
+                            { bg: 'bg-emerald-100', border: 'border-emerald-300', text: 'text-emerald-700', icon: 'text-emerald-500' }
+                        ];
+                        const w = index === 0 ? { bg: 'bg-yellow-100', border: 'border-yellow-400', text: 'text-yellow-800', icon: 'text-yellow-600' } : paletBiasa[(index - 1) % 4];
+
+                        const crownIcon = index === 0 ? '<div class="absolute -top-3 -right-3 bg-yellow-400 rounded-full p-1.5 shadow-md"><i data-lucide="crown" class="text-white" width="16" height="16"></i></div>' : '';
+
+                        htmlJumlah += `
+                            <div class="${w.bg} ${w.border} border-2 rounded-3xl p-5 shadow-sm flex flex-col justify-center items-center text-center transform transition hover:-translate-y-1 relative">
+                                ${crownIcon}
+                                <div class="bg-white p-3 rounded-full mb-3 shadow-sm">
+                                    <i data-lucide="smile" class="${w.icon}" width="28" height="28"></i>
+                                </div>
+                                <p class="font-extrabold text-gray-800 text-sm truncate w-full uppercase tracking-wide" title="${individu.nama}">${individu.nama}</p>
+                                <p class="font-black ${w.text} text-2xl mt-1">RM${individu.jumlah.toFixed(2)}</p>
+                            </div>
+                        `;
+                    });
+                }
+
+                htmlJumlah += `
+                        </div>
+                    </div>
+                `;
+
+                viewJumlahEl.innerHTML = htmlJumlah;
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('Ralat menarik data jumlah:', error);
+                viewJumlahEl.innerHTML = `
+                    <div class="text-center py-8 bg-red-50 text-red-600 rounded-3xl border-2 border-dashed border-red-200">
+                        <p class="font-medium text-sm">Gagal menarik data dari Google Sheet.<br/>Pastikan pautan berfungsi.</p>
+                        <button onclick="muatTurunDanRenderJumlah()" class="mt-4 px-4 py-2 bg-red-100 rounded-xl font-bold hover:bg-red-200 shadow-sm active:scale-95 transition">Cuba Lagi</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Fungsi untuk butang segar semula dropdown
+        window.refreshDropdownNama = async function() {
+            const ikonRefresh = document.getElementById('ikonRefresh');
+            
+            // Pusingkan ikon bila butang ditekan
+            if(ikonRefresh) ikonRefresh.classList.add('animate-spin');
+            
+            await muatTurunSenaraiNama();
+            
+            // Hentikan putaran ikon selepas siap tarik data (tambah delay sikit supaya nampak animasinya)
+            if(ikonRefresh) {
+                setTimeout(() => {
+                    ikonRefresh.classList.remove('animate-spin');
+                }, 500);
+            }
+        };
+
+        // Event Listener untuk Borang
+        borang.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Elak page refresh
+            
+            const nama = inputNama.value.trim();
+            const jumlah = inputJumlah.value.trim();
+
+            // Validasi
+            if (!nama || !jumlah) {
+                paparRalat('Sila masukkan nama dan jumlah duit raya ya! 🥺');
+                return;
+            }
+
+            const nilaiJumlah = parseFloat(jumlah);
+            if (isNaN(nilaiJumlah) || nilaiJumlah <= 0) {
+                paparRalat('Jumlah mesti lebih dari RM0 tau! 💸');
+                return;
+            }
+
+            // Cipta rekod baru
+            const rekodBaru = {
+                id: Date.now(),
+                nama: nama,
+                jumlah: nilaiJumlah,
+                tarikh: new Date().toLocaleString('ms-MY', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                })
+            };
+
+            // Tukar butang ke mod loading
+            const butangSubmit = borang.querySelector('button[type="submit"]');
+            const teksAsalButang = butangSubmit.innerHTML;
+            butangSubmit.innerHTML = '<i data-lucide="loader-2" class="animate-spin" width="24" height="24"></i> Menyimpan...';
+            butangSubmit.disabled = true;
+            lucide.createIcons(); // render ikon loading
+
+            try {
+                // Hantar data ke Google Sheets menggunakan fetch API
+                if(APPSCRIPT_URL !== 'MASUKKAN_URL_WEB_APP_DI_SINI') {
+                    await fetch(APPSCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', // Penting untuk elak isu CORS block dari browser
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(rekodBaru)
+                    });
+                } else {
+                    console.log("Sila masukkan APPSCRIPT_URL yang sebenar untuk simpan ke Google Sheets");
+                }
+
+                // Tambah ke atas tatasusunan (array) lokal untuk paparan di skrin
+                koleksi.unshift(rekodBaru);
+
+                // Reset borang
+                inputNama.value = '';
+                inputJumlah.value = '';
+                sembunyiRalat();
+
+                // Kemaskini paparan
+                renderKoleksi();
+
+            } catch (error) {
+                paparRalat('Ralat ketika menyimpan ke database! Pastikan internet OK. 😢');
+                console.error(error);
+            } finally {
+                // Kembalikan butang ke asal
+                butangSubmit.innerHTML = teksAsalButang;
+                butangSubmit.disabled = false;
+                lucide.createIcons();
+            }
+        });
+
+        // Panggilan render pertama kali untuk papar "Belum ada duit raya..."
+        renderKoleksi();
+
+        // Panggilan untuk ambil data dropdown nama
+        muatTurunSenaraiNama();
+
+    </script>
+</body>
+</html>
