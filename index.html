@@ -23,26 +23,21 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* CSS Tambahan untuk Scrollbar yang cantik */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        
+        /* CSS Animasi untuk Popup Password */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #a0aec0; 
-        }
+        .animate-fade-in-down { animation: fadeInDown 0.3s ease-out forwards; }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 font-sans text-gray-800 p-4 sm:p-8 flex justify-center items-start">
     
-    <!-- Kontena Utama -->
     <div class="max-w-md w-full bg-white/90 backdrop-blur-md rounded-[3rem] shadow-2xl overflow-hidden border-4 border-yellow-300">
         
         <!-- Header App -->
@@ -67,16 +62,16 @@
             </button>
         </div>
 
-        <!-- VIEW 1: REKOD (Borang & Sejarah) -->
+        <!-- VIEW 1: REKOD -->
         <div id="viewRekod" class="block">
             
-            <!-- Paparan Jumlah Keseluruhan (Stail Sampul Raya) -->
+            <!-- Paparan Jumlah Terkumpul -->
             <div class="px-6 pt-8 pb-4">
                 <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-3xl p-6 text-center shadow-lg border-2 border-green-300 relative transform transition hover:scale-105 duration-300">
                     <div class="absolute -top-4 -right-4 bg-yellow-400 rounded-full p-2 shadow-md">
-                        <i data-lucide="coins" class="text-green-800" width="28" height="28"></i>
+                        <i data-lucide="lock" class="text-green-800" width="28" height="28" id="ikonKunciUtama"></i>
                     </div>
-                    <p class="text-green-100 font-semibold mb-1">Jumlah Terkumpul</p>
+                    <p class="text-green-100 font-semibold mb-1">Jumlah Terkumpul (Keluarga Anda)</p>
                     <h2 class="text-5xl font-black text-yellow-300 drop-shadow-md" id="jumlahKeseluruhan">
                         RM 0.00
                     </h2>
@@ -86,51 +81,42 @@
             <!-- Borang Input -->
             <div class="px-6 py-4">
                 <form id="borangDuitRaya" class="space-y-4">
-                    
-                    <!-- Bekas Mesej Ralat -->
-                    <div id="bekasRalat" class="hidden bg-red-100 text-red-600 p-3 rounded-xl text-sm font-medium text-center border border-red-200">
-                        <!-- Teks ralat akan dipaparkan di sini -->
-                    </div>
+                    <div id="bekasRalat" class="hidden bg-red-100 text-red-600 p-3 rounded-xl text-sm font-medium text-center border border-red-200"></div>
                     
                     <div>
                         <div class="flex justify-between items-center mb-1 px-2">
-                            <label class="block text-sm font-bold text-gray-700">Siapa terima duit raya? 👦👧</label>
-                            <button type="button" onclick="refreshDropdownNama()" class="text-xs text-green-700 hover:text-green-900 font-bold flex items-center gap-1 bg-green-100 hover:bg-green-200 py-1.5 px-3 rounded-xl transition-all active:scale-95 shadow-sm">
+                            <label class="block text-sm font-bold text-gray-700">Nama Keluarga 👨‍👩‍👧‍👦</label>
+                            <button type="button" onclick="refreshDropdowns()" class="text-xs text-green-700 hover:text-green-900 font-bold flex items-center gap-1 bg-green-100 hover:bg-green-200 py-1.5 px-3 rounded-xl transition-all active:scale-95 shadow-sm">
                                 <i data-lucide="refresh-cw" width="14" height="14" id="ikonRefresh"></i> Segar Semula
                             </button>
                         </div>
-                        <input
-                            type="text"
-                            id="inputNama"
-                            list="senaraiNama"
-                            placeholder="Cth: Along, Angah, Adik..."
-                            class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 outline-none transition font-medium text-lg placeholder-gray-400 shadow-inner"
-                        />
-                        <!-- Datalist untuk dropdown nama dari Google Sheet -->
-                        <datalist id="senaraiNama">
-                            <!-- Data akan dijana oleh JavaScript -->
-                        </datalist>
+                        <input type="text" id="inputKeluarga" list="senaraiKeluarga" placeholder="Cth: Keluarga Hj. Ahmad..." class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 outline-none transition font-medium text-lg placeholder-gray-400 shadow-inner" />
+                        <datalist id="senaraiKeluarga"></datalist>
+                    </div>
+
+                    <!-- INPUT BARU: KATA LALUAN (Disembunyikan secara lalai) -->
+                    <div id="bekasPassword" class="hidden animate-fade-in-down">
+                        <label id="labelPassword" class="block text-sm font-bold text-gray-700 mb-1 ml-2">Kata Laluan Keluarga 🔐</label>
+                        <input type="password" id="inputPassword" placeholder="Masukkan password..." class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 outline-none transition font-medium text-lg placeholder-gray-400 shadow-inner" />
+                        <p id="hintPassword" class="text-xs text-gray-500 mt-1 ml-2">*Sila masukkan kata laluan.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1 ml-2">Siapa terima duit raya? 👦👧</label>
+                        <input type="text" id="inputNama" list="senaraiNama" placeholder="Cth: Along, Angah, Adik..." class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 outline-none transition font-medium text-lg placeholder-gray-400 shadow-inner" />
+                        <datalist id="senaraiNama"></datalist>
                     </div>
 
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1 ml-2">Berapa RM? 💵</label>
                         <div class="relative">
                             <span class="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold text-lg">RM</span>
-                            <input
-                                type="number"
-                                step="0.01"
-                                id="inputJumlah"
-                                placeholder="0.00"
-                                class="w-full pl-14 pr-5 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 outline-none transition font-black text-xl text-green-700 shadow-inner"
-                            />
+                            <input type="number" step="0.01" id="inputJumlah" placeholder="0.00" class="w-full pl-14 pr-5 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 outline-none transition font-black text-xl text-green-700 shadow-inner" />
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        class="w-full bg-yellow-400 hover:bg-yellow-300 text-green-900 font-extrabold text-lg py-4 rounded-2xl shadow-lg transform transition hover:-translate-y-1 active:translate-y-1 flex items-center justify-center gap-2 border-b-4 border-yellow-500 hover:border-yellow-400"
-                    >
-                        <i data-lucide="plus-circle" width="24" height="24"></i>
+                    <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-300 text-green-900 font-extrabold text-lg py-4 rounded-2xl shadow-lg transform transition hover:-translate-y-1 active:translate-y-1 flex items-center justify-center gap-2 border-b-4 border-yellow-500 hover:border-yellow-400">
+                        <i data-lucide="save" width="24" height="24"></i>
                         Simpan Duit Raya!
                     </button>
                 </form>
@@ -139,19 +125,15 @@
             <!-- Senarai Transaksi -->
             <div class="px-6 pb-8 pt-2">
                 <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2 ml-2">
-                    <i data-lucide="sparkles" class="text-yellow-500" width="18" height="18"></i> 
-                    Sejarah Koleksi
+                    <i data-lucide="history" class="text-yellow-500" width="18" height="18"></i> 
+                    Sejarah Koleksi (Terkini)
                 </h3>
-                
-                <!-- Bekas Senarai Dinamik -->
-                <div id="senaraiKoleksi" class="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                    <!-- Data akan dijana oleh JavaScript -->
-                </div>
+                <div id="senaraiKoleksi" class="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar"></div>
             </div>
 
         </div> <!-- Tamat VIEW 1 -->
 
-        <!-- VIEW 2: JUMLAH DUIT (Kad Keseluruhan & Kad Individu) -->
+        <!-- VIEW 2: JUMLAH DUIT -->
         <div id="viewJumlah" class="hidden px-6 pb-8 pt-6 space-y-6">
             <!-- Data Kad akan dijana oleh JavaScript -->
         </div>
@@ -159,20 +141,27 @@
     </div>
 
     <script>
-        // Inisialisasi Ikon Lucide untuk elemen statik
         lucide.createIcons();
 
-        // --- APPSCRIPT URL HARDCODED DI SINI ---
-        const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3rWHvx7glvcIf57HX8dbLuruF7SfoX8eoO_TEHgXUiN4P-HY2EuUyItgbh_DlmQOnqA/exec';
+        // URl
+        const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwR8h18nV0QFxxmHTRiOds5hoB6d4EkPu8lK7onNUbN-mKbArZEtp7r3x-65iL4XRtXVQ/exec';
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSY5yjCFIH3uQaI1Y7JO_L_U651dAmuv6thG_h9_kJN7ZCINhXdrscIgJnbyFIbFrBEZ085MU27VlUm/pub?gid=1004198975&single=true&output=csv';
 
-        // --- GOOGLE SHEET CSV URL UNTUK DROPDOWN ---
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSY5yjCFIH3uQaI1Y7JO_L_U651dAmuv6thG_h9_kJN7ZCINhXdrscIgJnbyFIbFrBEZ085MU27VlUm/pub?gid=1090904384&single=true&output=csv';
-
-        // State / Pembolehubah utama
+        // State Global & Privasi
         let koleksi = [];
+        let dataKeluargaGlobal = [];
+        let keluargaPasswords = {};   // Simpan kata laluan yang ditarik { "Kel Hj Ahmad": "1234" }
+        let keluargaUnlocked = {};    // Simpan status unlock { "Kel Hj Ahmad": true }
+        let stateAkordionTerbuka = {};// Simpan state accordion { "id_123": true }
 
-        // Elemen-elemen DOM
+        // DOM
         const borang = document.getElementById('borangDuitRaya');
+        const inputKeluarga = document.getElementById('inputKeluarga');
+        const inputPassword = document.getElementById('inputPassword');
+        const bekasPassword = document.getElementById('bekasPassword');
+        const labelPassword = document.getElementById('labelPassword');
+        const hintPassword = document.getElementById('hintPassword');
+        const datalistKeluarga = document.getElementById('senaraiKeluarga');
         const inputNama = document.getElementById('inputNama');
         const datalistNama = document.getElementById('senaraiNama');
         const inputJumlah = document.getElementById('inputJumlah');
@@ -180,6 +169,51 @@
         const jumlahKeseluruhanEl = document.getElementById('jumlahKeseluruhan');
         const senaraiKoleksiEl = document.getElementById('senaraiKoleksi');
         const viewJumlahEl = document.getElementById('viewJumlah');
+        const ikonKunciUtama = document.getElementById('ikonKunciUtama');
+
+        // FUNGSI PEMBANTU: Parse CSV dengan bijak untuk elak isu koma dalam tarikh
+        function parseCSVRow(row) {
+            const result = [];
+            let insideQuotes = false;
+            let current = '';
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                if (char === '"') {
+                    insideQuotes = !insideQuotes;
+                } else if (char === ',' && !insideQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result.map(s => s.trim().replace(/^"|"$/g, ''));
+        }
+
+        // Pemantau (Listener) untuk kotak Keluarga - Tunjuk/Sembunyi Password & Dinamik Label
+        inputKeluarga.addEventListener('input', function() {
+            const val = this.value.trim();
+            
+            if (val === '') {
+                bekasPassword.classList.add('hidden');
+                inputPassword.value = ''; 
+            } else {
+                bekasPassword.classList.remove('hidden');
+                
+                if (keluargaPasswords[val]) {
+                    labelPassword.innerText = 'Sahkan Kata Laluan Keluarga 🔐';
+                    inputPassword.placeholder = 'Masukkan password keluarga...';
+                    hintPassword.innerText = '*Keluarga sedia ada. Sila masukkan password yang betul.';
+                    hintPassword.className = 'text-xs text-blue-500 mt-1 ml-2 font-medium';
+                } else {
+                    labelPassword.innerText = 'Cipta Kata Laluan Keluarga 🔐';
+                    inputPassword.placeholder = 'Cipta password untuk keluarga ini...';
+                    hintPassword.innerText = '*Keluarga baharu dikesan. Sila cipta password.';
+                    hintPassword.className = 'text-xs text-orange-500 mt-1 ml-2 font-medium';
+                }
+            }
+        });
 
         // Fungsi Tukar Tab
         window.tukarTab = function(tab) {
@@ -191,290 +225,392 @@
             if (tab === 'rekod') {
                 viewRekod.classList.remove('hidden');
                 viewJumlah.classList.add('hidden');
-                
-                // Style Aktif untuk Rekod
                 btnRekod.className = "flex-1 py-3 rounded-2xl font-bold text-lg transition-all flex justify-center items-center gap-2 bg-green-500 text-white shadow-md border-b-4 border-green-700 active:translate-y-1";
-                // Style Pasif untuk Jumlah
                 btnJumlah.className = "flex-1 py-3 rounded-2xl font-bold text-lg transition-all flex justify-center items-center gap-2 bg-gray-100 text-gray-500 hover:bg-gray-200 border-b-4 border-gray-300 active:translate-y-1";
+                renderKoleksi(); 
             } else {
                 viewRekod.classList.add('hidden');
                 viewJumlah.classList.remove('hidden');
-
-                // Style Aktif untuk Jumlah
                 btnJumlah.className = "flex-1 py-3 rounded-2xl font-bold text-lg transition-all flex justify-center items-center gap-2 bg-yellow-400 text-yellow-900 shadow-md border-b-4 border-yellow-600 active:translate-y-1";
-                // Style Pasif untuk Rekod
                 btnRekod.className = "flex-1 py-3 rounded-2xl font-bold text-lg transition-all flex justify-center items-center gap-2 bg-gray-100 text-gray-500 hover:bg-gray-200 border-b-4 border-gray-300 active:translate-y-1";
-                
-                // Panggil fungsi tarik data jumlah dari Google Sheet bila tab dibuka
                 muatTurunDanRenderJumlah();
             }
         };
 
-        // Fungsi untuk mengemaskini paparan (Render)
-        function renderKoleksi() {
-            // 1. Kira dan papar jumlah keseluruhan
-            const jumlahTerkumpul = koleksi.reduce((total, item) => total + item.jumlah, 0);
+        // Render Tab 1 (Rekod & Sejarah)
+        window.renderKoleksi = function() {
+            const jumlahTerkumpul = koleksi
+                .filter(item => keluargaUnlocked[item.keluarga])
+                .reduce((total, item) => total + item.jumlah, 0);
             
-            // Pastikan elemen wujud sebelum mengubah suai
             if (jumlahKeseluruhanEl) {
-                jumlahKeseluruhanEl.innerText = `RM ${jumlahTerkumpul.toFixed(2)}`;
+                jumlahKeseluruhanEl.innerText = jumlahTerkumpul > 0 ? `RM ${jumlahTerkumpul.toFixed(2)}` : `RM ***`;
+            }
+            
+            if(ikonKunciUtama) {
+                const isAnyUnlocked = Object.values(keluargaUnlocked).some(v => v === true);
+                ikonKunciUtama.setAttribute('data-lucide', isAnyUnlocked ? 'unlock' : 'lock');
+                lucide.createIcons();
             }
 
-            // 2. Render senarai
-            senaraiKoleksiEl.innerHTML = ''; // Kosongkan senarai lama
-
+            senaraiKoleksiEl.innerHTML = '';
             if (koleksi.length === 0) {
-                // Paparan jika tiada rekod
                 senaraiKoleksiEl.innerHTML = `
                     <div class="text-center py-8 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
                         <p class="text-gray-500 font-medium text-sm">Belum ada duit raya lagi...<br/>Jom pergi beraya! 🏃‍♂️💨</p>
-                    </div>
-                `;
+                    </div>`;
             } else {
-                // Paparan rekod sedia ada
                 koleksi.forEach((rekod, index) => {
+                    const isUnlocked = keluargaUnlocked[rekod.keluarga];
+                    const jumlahTeks = isUnlocked ? `+RM${rekod.jumlah.toFixed(2)}` : `<i data-lucide="lock" width="14" height="14" class="inline"></i> RM ***`;
                     const warnaBorder = index % 2 === 0 ? 'border-l-green-400' : 'border-l-yellow-400';
-                    
+                    const jumlahWarna = isUnlocked ? 'text-green-600 bg-green-50' : 'text-gray-500 bg-gray-100';
+
                     const itemHTML = `
                         <div class="flex justify-between items-center p-4 rounded-2xl border-l-[6px] shadow-sm bg-white border-2 border-gray-100 transition-all hover:shadow-md ${warnaBorder}">
                             <div class="flex-1">
                                 <p class="font-bold text-gray-800 text-lg">${rekod.nama}</p>
+                                <p class="text-xs text-emerald-600 font-bold mb-0.5 mt-0.5 inline-flex items-center gap-1"><i data-lucide="users" width="12" height="12"></i> ${rekod.keluarga || 'Tiada maklumat keluarga'}</p>
                                 <p class="text-xs text-gray-400 font-medium mt-0.5">${rekod.tarikh}</p>
                             </div>
                             <div class="flex items-center gap-3">
-                                <span class="font-black text-green-600 text-xl bg-green-50 px-3 py-1 rounded-xl">
-                                    +RM${rekod.jumlah.toFixed(2)}
+                                <span class="font-black ${jumlahWarna} text-xl px-3 py-1 rounded-xl whitespace-nowrap">
+                                    ${jumlahTeks}
                                </span>
-                                <button 
-                                    onclick="padamRekod(${rekod.id})"
-                                    class="text-red-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition"
-                                    aria-label="Padam rekod"
-                                >
+                                <button onclick="padamRekod(${rekod.id})" class="text-red-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition" aria-label="Padam rekod">
                                     <i data-lucide="trash-2" width="20" height="20"></i>
                                 </button>
                             </div>
                         </div>
                     `;
-                    // Tambah ke dalam DOM
                     senaraiKoleksiEl.insertAdjacentHTML('beforeend', itemHTML);
                 });
+                lucide.createIcons();
             }
-
-            // Inisialisasi semula ikon Lucide untuk keseluruhan yang baru di-render
-            lucide.createIcons();
         }
 
-        // Fungsi papar ralat
         function paparRalat(mesej) {
             bekasRalat.innerText = mesej;
             bekasRalat.classList.remove('hidden');
         }
 
-        // Fungsi sembunyi ralat
         function sembunyiRalat() {
             bekasRalat.innerText = '';
             bekasRalat.classList.add('hidden');
         }
 
-        // Fungsi Padam Rekod (dipanggil dari butang dalam senarai HTML)
         window.padamRekod = function(id) {
             koleksi = koleksi.filter(rekod => rekod.id !== id);
             renderKoleksi();
         };
 
-        // Fungsi memuat turun senarai nama dari Google Sheet (CSV)
-        async function muatTurunSenaraiNama() {
+        // Fetch Dropdowns & Passwords
+        async function muatTurunDropdowns() {
             try {
-                // Tambah timestamp pada URL untuk elak Browser Cache (memaksa tarik data terbaharu)
-                const urlTerkini = CSV_URL + '&t=' + new Date().getTime();
-                const response = await fetch(urlTerkini);
+                const response = await fetch(CSV_URL + '&t=' + new Date().getTime());
                 if (!response.ok) throw new Error('Gagal muat turun CSV');
                 
                 const csvText = await response.text();
                 const rows = csvText.split('\n');
-                const senaraiUnik = new Set();
                 
-                // Mula dari row 1 (Abaikan row 0 kerana ia adalah Header)
+                const senaraiUnikKeluarga = new Set();
+                const senaraiUnikNama = new Set();
+                
+                // Index Mutlak: A=0, B=1, C=2, D=3, E=4, F=5
+                const colKeluarga = 1; // Column B
+                const colPenerima = 2; // Column C
+                const colPassword = 5; // Column F
+                
                 for (let i = 1; i < rows.length; i++) {
-                    const columns = rows[i].split(',');
-                    if (columns.length >= 2) {
-                        // Ambil Column B (Index 1) dan buang white space
-                        const nama = columns[1].trim().replace(/^"|"$/g, '');
-                        if (nama) {
-                            senaraiUnik.add(nama);
+                    const columns = parseCSVRow(rows[i]); // Gunakan parser bijak!
+                    
+                    if (columns.length > colKeluarga) {
+                        const keluarga = columns[colKeluarga];
+                        if (keluarga) {
+                            senaraiUnikKeluarga.add(keluarga);
+                            
+                            // Ekstrak Password dari Column F
+                            if (columns.length > colPassword) {
+                                const pass = columns[colPassword];
+                                if (pass && !keluargaPasswords[keluarga]) {
+                                    keluargaPasswords[keluarga] = pass;
+                                }
+                            }
                         }
+                    }
+                    if (columns.length > colPenerima) {
+                        const nama = columns[colPenerima];
+                        if (nama) senaraiUnikNama.add(nama);
                     }
                 }
 
-                // Kosongkan senarai lama sebelum tambah yang baru
-                datalistNama.innerHTML = '';
+                datalistKeluarga.innerHTML = '';
+                senaraiUnikKeluarga.forEach(kel => {
+                    const option = document.createElement('option');
+                    option.value = kel;
+                    datalistKeluarga.appendChild(option);
+                });
 
-                // Masukkan nama unik ke dalam elemen datalist HTML
-                senaraiUnik.forEach(nama => {
+                datalistNama.innerHTML = '';
+                senaraiUnikNama.forEach(nama => {
                     const option = document.createElement('option');
                     option.value = nama;
                     datalistNama.appendChild(option);
                 });
 
-            } catch (error) {
-                console.error('Ralat menarik data senarai nama:', error);
-            }
+            } catch (error) { console.error('Ralat menarik data dropdown:', error); }
         }
 
-        // Fungsi memuat turun dan mengira Jumlah Duit dari Google Sheet (CSV)
+        // Fetch Data Jumlah
         window.muatTurunDanRenderJumlah = async function() {
-            // Tunjuk paparan "Loading"
             viewJumlahEl.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-16 text-green-600">
                     <i data-lucide="loader-2" class="animate-spin mb-4" width="40" height="40"></i>
-                    <p class="font-bold text-lg">Mengira duit raya...</p>
-                    <p class="text-sm text-gray-500">Menarik data dari Google Sheets</p>
-                </div>
-            `;
+                    <p class="font-bold text-lg">Mengesahkan Privasi Data...</p>
+                </div>`;
             lucide.createIcons();
 
             try {
-                const urlTerkini = CSV_URL + '&t=' + new Date().getTime();
-                const response = await fetch(urlTerkini);
+                const response = await fetch(CSV_URL + '&t=' + new Date().getTime());
                 if (!response.ok) throw new Error('Gagal muat turun CSV');
                 
                 const csvText = await response.text();
                 const rows = csvText.split('\n');
-                
                 const ringkasan = {};
-                let jumlahTerkumpul = 0;
                 
-                // Mula dari row 1 (Abaikan row 0 kerana ia adalah Header)
+                const colKeluarga = 1; // B
+                const colPenerima = 2; // C
+                const colJumlah = 3;   // D
+                const colPassword = 5; // F
+                
                 for (let i = 1; i < rows.length; i++) {
-                    // Gunakan split koma standard
-                    const columns = rows[i].split(',');
+                    const columns = parseCSVRow(rows[i]); // Gunakan parser bijak
                     
-                    // Pastikan baris mempunyai data secukupnya (minima ada Kolum A, B, C)
-                    if (columns.length >= 3) {
-                        // Kolum B (Index 1) = Nama, Kolum C (Index 2) = Jumlah
-                        const nama = columns[1].trim().replace(/^"|"$/g, '');
-                        const jumlahStr = columns[2].trim().replace(/^"|"$/g, '');
+                    if (columns.length > Math.max(colKeluarga, colPenerima, colJumlah)) {
+                        let keluarga = columns[colKeluarga] ? columns[colKeluarga] : 'Lain-lain';
+                        const nama = columns[colPenerima] ? columns[colPenerima] : '';
+                        const jumlahStr = columns[colJumlah] ? columns[colJumlah] : '';
                         const jumlah = parseFloat(jumlahStr);
                         
-                        // Jika nama wujud dan jumlah adalah nombor yang sah
+                        // Ekstrak Password dari Column F
+                        if (columns.length > colPassword) {
+                            const pass = columns[colPassword];
+                            if (pass) keluargaPasswords[keluarga] = pass;
+                        }
+
                         if (nama && !isNaN(jumlah)) {
-                            if (!ringkasan[nama]) ringkasan[nama] = 0;
-                            ringkasan[nama] += jumlah;
-                            jumlahTerkumpul += jumlah;
+                            if (!ringkasan[keluarga]) ringkasan[keluarga] = { total: 0, members: {} };
+                            if (!ringkasan[keluarga].members[nama]) ringkasan[keluarga].members[nama] = 0;
+                            
+                            ringkasan[keluarga].members[nama] += jumlah;
+                            ringkasan[keluarga].total += jumlah;
                         }
                     }
                 }
 
-                // Tukar objek ke tatasusunan (array) & susun dari jumlah terbanyak
-                const senaraiIndividu = Object.keys(ringkasan).map(nama => ({
-                    nama: nama,
-                    jumlah: ringkasan[nama]
-                })).sort((a, b) => b.jumlah - a.jumlah);
+                dataKeluargaGlobal = Object.keys(ringkasan).map(kel => ({
+                    namaKeluarga: kel,
+                    totalKeluarga: ringkasan[kel].total,
+                    members: Object.keys(ringkasan[kel].members).map(nama => ({
+                        nama: nama,
+                        jumlah: ringkasan[kel].members[nama]
+                    })).sort((a, b) => b.jumlah - a.jumlah)
+                })).sort((a, b) => b.totalKeluarga - a.totalKeluarga);
 
-                let htmlJumlah = `
-                    <!-- Kad Jumlah Keseluruhan -->
-                    <div class="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-3xl p-6 text-center shadow-lg border-2 border-yellow-200 relative overflow-hidden transform transition hover:scale-105 duration-300">
-                        <div class="absolute -right-4 -top-4 opacity-20 text-yellow-800">
-                            <i data-lucide="award" width="120" height="120"></i>
-                        </div>
-                        <p class="text-yellow-900 font-bold mb-1 relative z-10 text-lg">Keseluruhan Kutipan Keluarga</p>
-                        <h2 class="text-5xl font-black text-white drop-shadow-md relative z-10">
-                            RM ${jumlahTerkumpul.toFixed(2)}
-                        </h2>
-                    </div>
-
-                    <div class="pt-2">
-                        <div class="flex justify-between items-center mb-4 ml-2">
-                            <h3 class="font-bold text-gray-700 flex items-center gap-2">
-                                <i data-lucide="users" class="text-green-500" width="20" height="20"></i> 
-                                Kutipan Setiap Orang
-                            </h3>
-                            <button onclick="muatTurunDanRenderJumlah()" class="text-xs text-green-700 hover:text-green-900 font-bold flex items-center gap-1 bg-green-100 hover:bg-green-200 py-1.5 px-3 rounded-xl transition-all active:scale-95 shadow-sm">
-                                <i data-lucide="refresh-cw" width="14" height="14"></i> Segar Semula
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                `;
-
-                if (senaraiIndividu.length === 0) {
-                    htmlJumlah += `
-                        <div class="col-span-2 text-center py-8 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-                            <p class="text-gray-500 font-medium text-sm">Belum ada duit raya direkodkan dalam sistem.</p>
-                        </div>
-                    `;
-                } else {
-                    senaraiIndividu.forEach((individu, index) => {
-                        const paletBiasa = [
-                            { bg: 'bg-pink-100', border: 'border-pink-300', text: 'text-pink-700', icon: 'text-pink-500' },
-                            { bg: 'bg-blue-100', border: 'border-blue-300', text: 'text-blue-700', icon: 'text-blue-500' },
-                            { bg: 'bg-purple-100', border: 'border-purple-300', text: 'text-purple-700', icon: 'text-purple-500' },
-                            { bg: 'bg-emerald-100', border: 'border-emerald-300', text: 'text-emerald-700', icon: 'text-emerald-500' }
-                        ];
-                        const w = index === 0 ? { bg: 'bg-yellow-100', border: 'border-yellow-400', text: 'text-yellow-800', icon: 'text-yellow-600' } : paletBiasa[(index - 1) % 4];
-
-                        const crownIcon = index === 0 ? '<div class="absolute -top-3 -right-3 bg-yellow-400 rounded-full p-1.5 shadow-md"><i data-lucide="crown" class="text-white" width="16" height="16"></i></div>' : '';
-
-                        htmlJumlah += `
-                            <div class="${w.bg} ${w.border} border-2 rounded-3xl p-5 shadow-sm flex flex-col justify-center items-center text-center transform transition hover:-translate-y-1 relative">
-                                ${crownIcon}
-                                <div class="bg-white p-3 rounded-full mb-3 shadow-sm">
-                                    <i data-lucide="smile" class="${w.icon}" width="28" height="28"></i>
-                                </div>
-                                <p class="font-extrabold text-gray-800 text-sm truncate w-full uppercase tracking-wide" title="${individu.nama}">${individu.nama}</p>
-                                <p class="font-black ${w.text} text-2xl mt-1">RM${individu.jumlah.toFixed(2)}</p>
-                            </div>
-                        `;
-                    });
-                }
-
-                htmlJumlah += `
-                        </div>
-                    </div>
-                `;
-
-                viewJumlahEl.innerHTML = htmlJumlah;
-                lucide.createIcons();
+                renderPaparanJumlah();
 
             } catch (error) {
                 console.error('Ralat menarik data jumlah:', error);
                 viewJumlahEl.innerHTML = `
                     <div class="text-center py-8 bg-red-50 text-red-600 rounded-3xl border-2 border-dashed border-red-200">
-                        <p class="font-medium text-sm">Gagal menarik data dari Google Sheet.<br/>Pastikan pautan berfungsi.</p>
-                        <button onclick="muatTurunDanRenderJumlah()" class="mt-4 px-4 py-2 bg-red-100 rounded-xl font-bold hover:bg-red-200 shadow-sm active:scale-95 transition">Cuba Lagi</button>
-                    </div>
-                `;
+                        <p class="font-medium text-sm">Gagal menarik data dari Google Sheet.</p>
+                        <button onclick="muatTurunDanRenderJumlah()" class="mt-4 px-4 py-2 bg-red-100 rounded-xl font-bold">Cuba Lagi</button>
+                    </div>`;
             }
         }
 
-        // Fungsi untuk butang segar semula dropdown
-        window.refreshDropdownNama = async function() {
-            const ikonRefresh = document.getElementById('ikonRefresh');
+        // Render HTML Jumlah
+        window.renderPaparanJumlah = function() {
+            let jumlahUnlockedKeseluruhan = 0;
             
-            // Pusingkan ikon bila butang ditekan
-            if(ikonRefresh) ikonRefresh.classList.add('animate-spin');
+            dataKeluargaGlobal.forEach(kel => {
+                if (keluargaUnlocked[kel.namaKeluarga]) {
+                    jumlahUnlockedKeseluruhan += kel.totalKeluarga;
+                }
+            });
+
+            let htmlJumlah = `
+                <div class="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-3xl p-6 text-center shadow-lg border-2 border-yellow-200 relative overflow-hidden transform transition hover:scale-105 duration-300">
+                    <div class="absolute -right-4 -top-4 opacity-20 text-yellow-800">
+                        <i data-lucide="shield-check" width="120" height="120"></i>
+                    </div>
+                    <p class="text-yellow-900 font-bold mb-1 relative z-10 text-lg">Kutipan Keluarga Anda (Disahkan)</p>
+                    <h2 class="text-5xl font-black text-white drop-shadow-md relative z-10">
+                        ${jumlahUnlockedKeseluruhan > 0 ? 'RM ' + jumlahUnlockedKeseluruhan.toFixed(2) : 'RM ***'}
+                    </h2>
+                </div>
+
+                <div class="pt-2">
+                    <div class="flex justify-between items-center mb-4 ml-2">
+                        <h3 class="font-bold text-gray-700 flex items-center gap-2">
+                            <i data-lucide="lock" class="text-green-500" width="20" height="20"></i> 
+                            Kutipan Mengikut Keluarga
+                        </h3>
+                        <button onclick="muatTurunDanRenderJumlah()" class="text-xs text-green-700 hover:text-green-900 font-bold flex items-center gap-1 bg-green-100 hover:bg-green-200 py-1.5 px-3 rounded-xl transition-all active:scale-95 shadow-sm">
+                            <i data-lucide="refresh-cw" width="14" height="14"></i> Segar Semula
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+            `;
+
+            if (dataKeluargaGlobal.length === 0) {
+                htmlJumlah += `<div class="text-center py-8 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200"><p class="text-gray-500 font-medium text-sm">Belum ada duit raya direkodkan.</p></div>`;
+            } else {
+                dataKeluargaGlobal.forEach((keluargaData, idxKeluarga) => {
+                    const safeId = 'kel_' + keluargaData.namaKeluarga.replace(/[^a-zA-Z0-9]/g, '_') + '_' + idxKeluarga;
+                    const isUnlocked = keluargaUnlocked[keluargaData.namaKeluarga];
+                    const isExpanded = stateAkordionTerbuka[safeId];
+                    
+                    htmlJumlah += `
+                        <div class="bg-white rounded-3xl border-2 border-gray-100 shadow-sm overflow-hidden transition-all duration-300">
+                            <!-- Butang Header Keluarga -->
+                            <button onclick="toggleKeluarga('${safeId}')" class="w-full flex justify-between items-center p-5 hover:bg-emerald-50 focus:bg-emerald-50 transition-colors text-left group">
+                                <div class="flex items-center gap-3">
+                                    <div class="${isUnlocked ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'} group-hover:scale-110 transition-all p-3 rounded-full shadow-sm">
+                                        <i data-lucide="${isUnlocked ? 'unlock' : 'lock'}" width="24" height="24"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-extrabold text-gray-800 text-lg">${keluargaData.namaKeluarga}</p>
+                                        <p class="text-xs font-semibold ${isUnlocked ? 'text-emerald-600' : 'text-gray-400'}">${isUnlocked ? keluargaData.members.length + ' penerima' : 'Dilindungi Privasi'}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <p class="text-xs text-gray-400 font-bold mb-0.5">Jumlah</p>
+                                        <p class="font-black ${isUnlocked ? 'text-emerald-600' : 'text-gray-400'} text-xl">
+                                            ${isUnlocked ? 'RM' + keluargaData.totalKeluarga.toFixed(2) : 'RM ***'}
+                                        </p>
+                                    </div>
+                                    <div class="bg-gray-100 rounded-full p-1.5">
+                                        <i data-lucide="chevron-down" id="icon_${safeId}" class="text-gray-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}" width="20" height="20"></i>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <!-- Kandungan Bawah -->
+                            <div id="content_${safeId}" class="${isExpanded ? '' : 'hidden'} p-5 pt-2 bg-gray-50/50 border-t-2 border-gray-100">
+                    `;
+                    
+                    if (!isUnlocked) {
+                        htmlJumlah += `
+                                <div class="p-4 bg-white rounded-2xl text-center border-2 border-dashed border-gray-200">
+                                    <i data-lucide="key" class="mx-auto text-yellow-500 mb-2" width="32" height="32"></i>
+                                    <p class="text-sm font-bold text-gray-700 mb-3">Masukkan kata laluan keluarga untuk melihat butiran:</p>
+                                    <input type="password" id="pass_${safeId}" class="w-full max-w-xs mx-auto block px-4 py-3 border-2 focus:border-emerald-500 focus:ring-4 outline-none rounded-xl mb-3 text-center font-bold tracking-widest text-lg" placeholder="Kata Laluan">
+                                    <button onclick="bukaKunci('${keluargaData.namaKeluarga}', '${safeId}')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold shadow-md active:scale-95 transition-all w-full max-w-xs mx-auto">Sahkan & Buka</button>
+                                    <p id="err_${safeId}" class="text-red-500 font-bold text-sm mt-3 hidden bg-red-100 p-2 rounded-lg max-w-xs mx-auto">❌ Kata laluan salah!</p>
+                                </div>
+                        `;
+                    } else {
+                        htmlJumlah += `<div class="grid grid-cols-2 gap-3 mt-3">`;
+                        keluargaData.members.forEach((individu, index) => {
+                            const paletBiasa = [
+                                { bg: 'bg-pink-100', border: 'border-pink-300', text: 'text-pink-700', icon: 'text-pink-500' },
+                                { bg: 'bg-blue-100', border: 'border-blue-300', text: 'text-blue-700', icon: 'text-blue-500' },
+                                { bg: 'bg-purple-100', border: 'border-purple-300', text: 'text-purple-700', icon: 'text-purple-500' },
+                                { bg: 'bg-teal-100', border: 'border-teal-300', text: 'text-teal-700', icon: 'text-teal-500' }
+                            ];
+                            const w = index === 0 ? { bg: 'bg-yellow-100', border: 'border-yellow-400', text: 'text-yellow-800', icon: 'text-yellow-600' } : paletBiasa[(index - 1) % 4];
+                            const crownIcon = index === 0 ? '<div class="absolute -top-2 -right-2 bg-yellow-400 rounded-full p-1 shadow-md"><i data-lucide="crown" class="text-white" width="14" height="14"></i></div>' : '';
+
+                            htmlJumlah += `
+                                <div class="${w.bg} ${w.border} border-2 rounded-2xl p-4 shadow-sm flex flex-col justify-center items-center text-center relative hover:scale-105 transition-transform">
+                                    ${crownIcon}
+                                    <div class="bg-white p-2 rounded-full mb-2 shadow-sm">
+                                        <i data-lucide="smile" class="${w.icon}" width="24" height="24"></i>
+                                    </div>
+                                    <p class="font-bold text-gray-800 text-xs truncate w-full uppercase tracking-wide" title="${individu.nama}">${individu.nama}</p>
+                                    <p class="font-black ${w.text} text-lg mt-0.5">RM${individu.jumlah.toFixed(2)}</p>
+                                </div>
+                            `;
+                        });
+                        htmlJumlah += `</div>`;
+                    }
+
+                    htmlJumlah += `</div></div>`;
+                });
+            }
+
+            htmlJumlah += `</div></div>`;
+            viewJumlahEl.innerHTML = htmlJumlah;
+            lucide.createIcons();
+        }
+
+        // Toggle Expand/Collapse
+        window.toggleKeluarga = function(id) {
+            const content = document.getElementById('content_' + id);
+            const icon = document.getElementById('icon_' + id);
             
-            await muatTurunSenaraiNama();
-            
-            // Hentikan putaran ikon selepas siap tarik data (tambah delay sikit supaya nampak animasinya)
-            if(ikonRefresh) {
-                setTimeout(() => {
-                    ikonRefresh.classList.remove('animate-spin');
-                }, 500);
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+                stateAkordionTerbuka[id] = true;
+            } else {
+                content.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+                stateAkordionTerbuka[id] = false;
             }
         };
 
-        // Event Listener untuk Borang
+        // Fungsi Sahkan Kata Laluan
+        window.bukaKunci = function(namaKeluarga, safeId) {
+            const passInput = document.getElementById('pass_' + safeId).value;
+            if (keluargaPasswords[namaKeluarga] && passInput === keluargaPasswords[namaKeluarga]) {
+                keluargaUnlocked[namaKeluarga] = true;
+                renderPaparanJumlah(); 
+                renderKoleksi();       
+            } else {
+                const err = document.getElementById('err_' + safeId);
+                err.classList.remove('hidden');
+                err.classList.add('animate-pulse');
+                setTimeout(() => err.classList.remove('animate-pulse'), 1500);
+            }
+        };
+
+        window.refreshDropdowns = async function() {
+            const ikonRefresh = document.getElementById('ikonRefresh');
+            if(ikonRefresh) ikonRefresh.classList.add('animate-spin');
+            await muatTurunDropdowns();
+            inputKeluarga.dispatchEvent(new Event('input')); 
+            if(ikonRefresh) setTimeout(() => { ikonRefresh.classList.remove('animate-spin'); }, 500);
+        };
+
+        // Submit Form
         borang.addEventListener('submit', async function(e) {
-            e.preventDefault(); // Elak page refresh
+            e.preventDefault(); 
             
+            const keluarga = inputKeluarga.value.trim();
+            const password = inputPassword.value.trim();
             const nama = inputNama.value.trim();
             const jumlah = inputJumlah.value.trim();
 
-            // Validasi
-            if (!nama || !jumlah) {
-                paparRalat('Sila masukkan nama dan jumlah duit raya ya! 🥺');
+            if (!keluarga || !password || !nama || !jumlah) {
+                paparRalat('Sila isikan semua maklumat termasuk Kata Laluan! 🔐');
                 return;
             }
+
+            const isKeluargaBaru = !keluargaPasswords[keluarga];
+
+            if (!isKeluargaBaru) {
+                if (password !== keluargaPasswords[keluarga]) {
+                    paparRalat('Kata Laluan keluarga salah! Sila cuba lagi. ❌');
+                    return;
+                }
+            } else {
+                keluargaPasswords[keluarga] = password;
+            }
+            
+            keluargaUnlocked[keluarga] = true; 
 
             const nilaiJumlah = parseFloat(jumlah);
             if (isNaN(nilaiJumlah) || nilaiJumlah <= 0) {
@@ -482,69 +618,49 @@
                 return;
             }
 
-            // Cipta rekod baru
             const rekodBaru = {
                 id: Date.now(),
+                keluarga: keluarga,
                 nama: nama,
                 jumlah: nilaiJumlah,
+                password: password,
                 tarikh: new Date().toLocaleString('ms-MY', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
+                    day: 'numeric', month: 'short', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit',
                 })
             };
 
-            // Tukar butang ke mod loading
             const butangSubmit = borang.querySelector('button[type="submit"]');
             const teksAsalButang = butangSubmit.innerHTML;
             butangSubmit.innerHTML = '<i data-lucide="loader-2" class="animate-spin" width="24" height="24"></i> Menyimpan...';
             butangSubmit.disabled = true;
-            lucide.createIcons(); // render ikon loading
+            lucide.createIcons();
 
             try {
-                // Hantar data ke Google Sheets menggunakan fetch API
-                if(APPSCRIPT_URL !== 'MASUKKAN_URL_WEB_APP_DI_SINI') {
+                if(APPSCRIPT_URL) {
                     await fetch(APPSCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors', // Penting untuk elak isu CORS block dari browser
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        method: 'POST', mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(rekodBaru)
                     });
-                } else {
-                    console.log("Sila masukkan APPSCRIPT_URL yang sebenar untuk simpan ke Google Sheets");
                 }
-
-                // Tambah ke atas tatasusunan (array) lokal untuk paparan di skrin
                 koleksi.unshift(rekodBaru);
-
-                // Reset borang
-                inputNama.value = '';
-                inputJumlah.value = '';
+                inputKeluarga.value = ''; inputPassword.value = ''; inputNama.value = ''; inputJumlah.value = '';
                 sembunyiRalat();
-
-                // Kemaskini paparan
+                bekasPassword.classList.add('hidden');
                 renderKoleksi();
 
             } catch (error) {
-                paparRalat('Ralat ketika menyimpan ke database! Pastikan internet OK. 😢');
-                console.error(error);
+                paparRalat('Ralat! Pastikan internet OK. 😢');
             } finally {
-                // Kembalikan butang ke asal
                 butangSubmit.innerHTML = teksAsalButang;
                 butangSubmit.disabled = false;
                 lucide.createIcons();
             }
         });
 
-        // Panggilan render pertama kali untuk papar "Belum ada duit raya..."
         renderKoleksi();
-
-        // Panggilan untuk ambil data dropdown nama
-        muatTurunSenaraiNama();
+        muatTurunDropdowns();
 
     </script>
 </body>
